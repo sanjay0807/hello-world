@@ -375,6 +375,13 @@
     padding-top: 6px;
   }
 
+  .move-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
   .move-select {
     font-size: 0.75rem;
     padding: 4px 6px;
@@ -905,7 +912,7 @@ function renderCard(task) {
         ${overdue ? '<span class="badge-overdue">⚠ Overdue</span>' : ""}
       </div>
       <div class="card-actions">
-        <label class="visually-hidden" for="move-${escapeHtml(task.id)}">Move task ${escapeHtml(task.id)} to column</label>
+        <label class="move-label" for="move-${escapeHtml(task.id)}">Move ▸</label>
         <select class="move-select" id="move-${escapeHtml(task.id)}" data-action="move" data-id="${escapeHtml(task.id)}" aria-label="Move ${escapeHtml(task.id)} to a different column">
           ${moveOptions}
         </select>
@@ -1194,12 +1201,16 @@ addTaskForm.addEventListener("submit", async (e) => {
   });
 
   showToast(`Task ${task.id} added.`, "success");
-  closeModal();
+  addTaskForm.reset();
+  document.getElementById("description-count").textContent = "0 / 500";
+
+  // Keep the button in its "Sending…" state until the notification settles.
+  // notifyNewTask() swallows its own errors, so this always re-enables the form.
+  await notifyNewTask(task);
 
   submitBtn.disabled = false;
   submitBtn.textContent = "Add Task";
-
-  notifyNewTask(task);
+  closeModal();
 });
 
 /* =========================================================================
